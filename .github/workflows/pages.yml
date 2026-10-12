@@ -1,8 +1,6 @@
+# Site is unpublished during development. Publish only after Lewis approves launch.
 name: Publish companion website
 on:
-  push:
-    branches: [main]
-    paths: ['site/**', 'recipes/**', 'launcher/core.py', 'tools/check_project.py', 'tests/test_site.js', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
