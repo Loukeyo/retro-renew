@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+demo/
+build-output/
+*.spec
+.DS_Store
+Retro-Renew-Preview.html
+Retro-Renew-Project.zip
