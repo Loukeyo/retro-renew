@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "id": "replace-with-game-slug",
+  "status": "draft",
+  "title": "Replace with game title",
+  "version": "1.0.0",
+  "edition": "Exact storefront edition and executable version",
+  "executable": "Game.exe",
+  "steam_folders": ["Exact Steam folder name"],
+  "markers": [{"path": "Game.exe", "sha256": "REPLACE_WITH_REAL_SHA256"}],
+  "conflicts": ["dinput8.dll", "scripts"],
+  "protected": ["saves"],
+  "artifacts": [{
+    "id": "component-id",
+    "name": "Mod or tool name",
+    "author": "Author and relevant contributors",
+    "page": "https://example.com/original-project",
+    "sha256": "REPLACE_WITH_ARCHIVE_SHA256",
+    "max_bytes": 104857600,
+    "expanded_bytes": 209715200,
+    "notice": "Required licence notices and author instructions",
+    "permission": {"reviewed": false, "method": "manual", "evidence": "Record the licence clause or written permission and review date"},
+    "files": [{"source": "archive/path/file.ini", "destination": "mods/file.ini", "sha256": "REPLACE_WITH_EXTRACTED_SHA256", "original_sha256": null}]
+  }]
+}

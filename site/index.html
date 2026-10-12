@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Retro Renew video companions: mod links, author credits, and game installers.">
+<meta name="theme-color" content="#12181e"><title>Retro Renew / Games</title>
+<link rel="stylesheet" href="styles.css"><script defer src="catalogue.js"></script><script defer src="app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to games</a>
+<header class="site-header"><a class="brand" href="#" aria-label="Retro Renew home">RETRO <span>RENEW</span></a><a href="https://www.youtube.com/@RetroRenew" target="_blank" rel="noopener noreferrer">YouTube</a></header>
+<main id="main" tabindex="-1">
+<noscript><p class="catalogue-status">Enable JavaScript to browse game companions. You can still watch the videos on <a href="https://www.youtube.com/@RetroRenew">YouTube</a>.</p></noscript>
+<p id="route-error" class="catalogue-status" role="status" hidden></p>
+<section id="shelf-view">
+<div class="page-heading"><h1 id="shelf-heading" tabindex="-1">Game companions</h1><p>Mods and tools from the videos, with links to their creators.</p></div>
+<label class="search"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Search games, mods, or authors" aria-label="Search games, mods, or authors"><kbd>/</kbd></label>
+<div class="browse-controls"><div class="filters" id="filters" role="group" aria-label="Filter by series"></div><div class="view-controls"><button class="nav-item active" id="home-link" aria-pressed="true">All games</button><button class="nav-item" id="setups-link" aria-pressed="false">Installers</button></div></div>
+<p id="catalogue-status" class="catalogue-status"></p>
+<p class="result-summary"><span id="result-count" role="status" aria-live="polite" aria-atomic="true"></span></p>
+<div class="game-list" id="games"></div>
+<div class="empty" id="empty" hidden><h2 id="empty-title">No matching games.</h2><p id="empty-description">Try another search.</p><button id="reset" class="button">Clear filters</button></div>
+</section>
+<section id="detail-view" hidden></section>
+<footer><div><button id="how-link" class="text-button">How installers work</button><button id="credits-link" class="text-button">Mod authors</button></div><p>Games and mods belong to their respective owners.</p></footer>
+</main>
+<dialog id="info-dialog" aria-labelledby="dialog-title"><button class="dialog-close" aria-label="Close dialog"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button><div id="dialog-content"></div></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+</body></html>

@@ -1,0 +1,48 @@
+name: Build Windows launcher
+on:
+  push:
+    branches: [main]
+    paths: ['launcher/**', 'tools/build_launcher.py', 'tools/create_demo.py', '.github/workflows/windows-build.yml']
+  workflow_dispatch:
+    inputs:
+      recipe:
+        description: 'Repository recipe path (empty builds the harmless training demo)'
+        required: false
+        default: ''
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      RECIPE_PATH: ${{ inputs.recipe }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m unittest discover -s tests -v
+      - run: python tools/check_project.py
+      - run: node tests/test_site.js
+      - run: python -m pip install PyInstaller==6.22.3
+      - name: Prepare embedded recipe
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrEmpty($env:RECIPE_PATH)) {
+            python tools/create_demo.py demo
+            $env:RECIPE_PATH = 'demo/recipe.json'
+          }
+          python tools/build_launcher.py --recipe $env:RECIPE_PATH
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RetroRenew-Windows
+          path: |
+            build-output/*.exe
+            build-output/SHA256SUMS.txt
+            build-output/build-info.json
+            demo/**
+          if-no-files-found: error

@@ -1,0 +1,48 @@
+// Fast DOM regressions. These do not claim rendered browser or layout verification.
+const fs=require('fs'),vm=require('vm'),path=require('path'),assert=require('assert');
+const root=path.resolve(__dirname,'..'), elements=new Map(),events=new Map();
+function element(){return {innerHTML:'',textContent:'',value:'',hidden:false,dataset:{},attributes:{},focused:false,classList:{add(){},remove(){},toggle(){}},setAttribute(k,v){this.attributes[k]=v},querySelectorAll(){if(!this.buttons)this.buttons=[...this.innerHTML.matchAll(/data-series="([^"]+)"/g)].map(m=>{const b=element();b.dataset.series=m[1];return b});return this.buttons},focus(){this.focused=true},showModal(){this.open=true},close(){this.open=false}}}
+const document={querySelector(s){if(!elements.has(s))elements.set(s,element());return elements.get(s)},addEventListener(k,f){events.set(k,f)},activeElement:{tagName:'BODY'},title:''};
+const window={addEventListener(k,f){events.set(k,f)},scrollTo(){}};
+const context=vm.createContext({window,document,location:{hash:'',href:'https://example.com/retro-renew/#gta-iv'},URL,navigator:{clipboard:{writeText:async()=>{}}},setTimeout(){}});
+const run=s=>vm.runInContext(s,context),el=s=>document.querySelector(s);
+run(fs.readFileSync(path.join(root,'site/catalogue.js'),'utf8'));run(fs.readFileSync(path.join(root,'site/app.js'),'utf8'));
+assert.equal(el('#result-count').textContent,'6 games');
+assert(el('#games').innerHTML.includes('Grand Theft Auto IV'));
+assert(el('#catalogue-status').textContent.includes('No game installers released'));
+el('#search').value='FusionFix';run('render()');assert.equal(el('#result-count').textContent,'1 game');
+el('#search').value='nothing-here';run('render()');assert.equal(el('#empty').hidden,false);
+el('#reset').onclick();assert.equal(el('#result-count').textContent,'6 games');
+el('#setups-link').onclick();assert.equal(el('#result-count').textContent,'0 games');
+assert.equal(el('#empty-title').textContent,'No installers match your filters.');
+assert.equal(el('#reset').textContent,'Browse all games');
+assert.equal(el('#setups-link').attributes['aria-pressed'],'true');
+el('#filters').querySelectorAll('button').find(b=>b.dataset.series==='Grand Theft Auto').onclick();assert.equal(run('onlyInstallers'),true);assert.equal(el('#result-count').textContent,'0 games');
+context.location.hash='#gta-iv';events.get('hashchange')();
+assert.equal(el('#detail-view').hidden,false);assert.equal(el('#detail-title').focused,true);
+assert(el('#detail-view').innerHTML.includes('Installer not released'));
+assert(el('#mod-list').innerHTML.includes('FusionFix contributors'));
+assert(el('#mod-list').innerHTML.includes('Usage and installer permissions'));
+assert(el('#mod-list').innerHTML.includes('permissions have not been reviewed'));
+run("modRows(data.games[0],'not-a-mod')");assert(el('#mod-list').innerHTML.includes('No matching mods'));
+context.location.hash='#main';run('route()');assert.equal(el('#detail-view').hidden,false); // Skip link does not leave detail.
+context.location.hash='#missing';events.get('hashchange')();assert.equal(el('#detail-view').hidden,true);
+assert.equal(el('#route-error').hidden,false);assert(el('#shelf-heading').focused);
+context.location.hash='#%invalid';run('route()');assert.equal(el('#route-error').hidden,true);
+context.location.hash='#gta-iv';run('route()');el('#home-link').onclick();assert.equal(context.location.hash,'');
+assert.equal(el('#result-count').textContent,'6 games');
+assert.equal(run("safeUrl('javascript:alert(1)')"),null);
+assert.equal(run("safeUrl('https://user:pass@example.com')"),null);
+assert.equal(run("safeUrl('http://example.com')"),null);
+assert.equal(run("esc('<img onerror=bad>')"),'&lt;img onerror=bad&gt;');
+run('how()');assert.equal(el('#info-dialog').open,true);el('.dialog-close').onclick();assert.equal(el('#info-dialog').open,false);
+context.location.hash='#gta-iv';run("data.games[0].status='reference';route()");assert(el('#detail-view').innerHTML.includes('Mod reference list'));
+run("data.games[0].status='released';data.games[0].installerUrl='javascript:alert(1)';route()");assert(el('#detail-view').innerHTML.includes('Installer not released'));
+run("data.games[0].installerUrl='https://example.com/setup.exe';render();route()");
+assert(el('#catalogue-status').textContent.includes('1 tested installer available'));
+assert(el('#detail-view').innerHTML.includes('Download installer'));
+el('#setups-link').onclick();assert.equal(el('#result-count').textContent,'1 game');
+run("data.games[0].mods[0].name='<script>bad</script>';data.games[0].mods[0].page='javascript:alert(1)';modRows(data.games[0])");
+assert(!el('#mod-list').innerHTML.includes('<script>'));assert(el('#mod-list').innerHTML.includes('Source link unavailable'));
+run('authors()');assert(!el('#dialog-content').innerHTML.includes('href="javascript:'));
+(async()=>{context.navigator.clipboard.writeText=async()=>{throw Error('Permission denied')};await run('copyLink()');assert(el('#dialog-content').innerHTML.includes('https://example.com/retro-renew/#gta-iv'));assert(el('#dialog-content').innerHTML.includes('readonly'));console.log('Website checks passed: navigation, filters, deep links, release gating, permissions, URL safety, and clipboard fallback.');})().catch(e=>{console.error(e);process.exitCode=1});
